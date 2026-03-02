@@ -48,15 +48,21 @@ onexit() {
     # and then stop containers.
     [ "$pid" ] && { pkill -SIGHUP -P $pid; docker compose stop; } || true
     wait
+    if [ -t 0 ]; then
+        stty sane
+    fi
     if [ "$keep" = "" ]; then
-        clean
+        echo
+        read -rp "  Remove persistent data? [y/N] " confirm
+        if [[ "$confirm" =~ ^[Yy]$ ]]; then
+            clean
+        else
+            echo "Data was not removed. You can remove it with: $0 --clean"
+        fi
     else
         echo "Data was not removed. You can remove it with: $0 --clean"
     fi
     rm -rf /tmp/aplus || true
-    if [ -t 0 ]; then
-      stty sane
-    fi
     exit 0
 }
 
